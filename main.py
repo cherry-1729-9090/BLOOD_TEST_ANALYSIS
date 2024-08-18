@@ -1,44 +1,68 @@
 import os
+import json
 import streamlit as st
 from dotenv import load_dotenv
 from crewai import Crew, Process
-from agents import blood_test_analyst, article_researcher, health_advisor
-from tasks import analyze_blood_test_task, find_articles_task, provide_recommendations_task
+from agents import Agent
+from tools import search_tool, web_search_tool
+from langchain_google_genai import ChatGoogleGenerativeAI
 from PyPDF2 import PdfReader
+from tasks import analyze_blood_test_task, find_articles_task, provide_recommendations_task
 
 # Load environment variables
 load_dotenv()
+
+# Load the trained agent configurations
+with open('trained_agents_config.json', 'r') as f:
+    trained_configs = json.load(f)
+
+# Configure the GEMINI model
+gemini_model = ChatGoogleGenerativeAI(model="gemini-pro", temperature=0.7)
+
+# Function to get agent configuration from the list
+def get_agent_config(agent_role, configs):
+    for config in configs:
+        if config['role'] == agent_role:
+            return config
+    return None
+
+# Initialize the agents with the trained configurations
+blood_test_analyst_config = get_agent_config('Blood Test Analyst', trained_configs)
+article_researcher_config = get_agent_config('Medical Research Specialist', trained_configs)
+health_advisor_config = get_agent_config('Holistic Health Advisor', trained_configs)
+
+blood_test_analyst = Agent(
+    role=blood_test_analyst_config['role'],
+    goal=blood_test_analyst_config['goal'],
+    backstory=blood_test_analyst_config['backstory'],
+    verbose=True,
+    allow_delegation=False,
+    llm=gemini_model,
+)
+
+article_researcher = Agent(
+    role=article_researcher_config['role'],
+    goal=article_researcher_config['goal'],
+    backstory=article_researcher_config['backstory'],
+    tools=[search_tool, web_search_tool],
+    verbose=True,
+    allow_delegation=False,
+    llm=gemini_model,
+)
+
+health_advisor = Agent(
+    role=health_advisor_config['role'],
+    goal=health_advisor_config['goal'],
+    backstory=health_advisor_config['backstory'],
+    verbose=True,
+    allow_delegation=False,
+    llm=gemini_model,
+)
 
 # Define the main function for the Streamlit app
 def main():
     st.set_page_config(page_title="Medical Report Analysis", layout="wide")
     st.title("🩺 Medical Report Analysis")
-
-    st.markdown("""
-    <style>
-        .main-title {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #2E86C1;
-        }
-        .sub-title {
-            font-size: 1.75em;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #2980B9;
-        }
-        .recommendation {
-            margin-top: 20px;
-            font-size: 1.25em;
-            color: #1C2833;
-        }
-        .observation {
-            font-size: 1.15em;
-            margin-bottom: 15px;
-            color: #34495E;
-        }
-    </style>
-    """, unsafe_allow_html=True)
 
     uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
@@ -49,7 +73,7 @@ def main():
         if st.button("Analyze Report"):
             st.write("Analyzing the report... This may take a few minutes.")
 
-            # Create a Crew and execute tasks
+            # Create a Crew and execute tasks using the trained agents
             crew = Crew(
                 agents=[blood_test_analyst, article_researcher, health_advisor],
                 tasks=[analyze_blood_test_task, find_articles_task, provide_recommendations_task],
@@ -60,25 +84,15 @@ def main():
             with st.spinner("Processing..."):
                 try:
                     result = crew.kickoff(inputs={"text": text})
-                    st.write(result)  # Inspect the result object
 
-                    if isinstance(result, str):
-                        result_str = result
-                    else:
+                    if isinstance(result, dict):
                         result_str = format_analysis(result)
+                        st.markdown(result_str, unsafe_allow_html=True)
+                    else:
+                        st.markdown(result, unsafe_allow_html=True)  # Directly render the markdown
+
                 except Exception as e:
                     st.error(f"An error occurred during analysis: {e}")
-                    return
-
-            # Display results with enhanced styling
-            st.markdown(result_str, unsafe_allow_html=True)
-
-            # Save the results to a markdown file if needed
-            # output_file = "results1.md"
-            # with open(output_file, "w") as file:
-            #     file.write(result_str)
-
-            # st.success(f"Results have been written to {output_file}")
 
 def extract_text_from_pdf(uploaded_file):
     text = ""
@@ -91,34 +105,42 @@ def extract_text_from_pdf(uploaded_file):
     return text
 
 def format_analysis(result):
-    # Check if result is a string or a dictionary
-    if isinstance(result, str):
-        return f"<h2 class='main-title'>Analysis Results</h2><p>{result}</p>"
-    elif isinstance(result, dict):
-        output = f"""
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <h2 style="color: #2E86C1;">Analysis Results</h2>
-            
-            <h3 style="color: #2980B9;">Summary of Key Findings</h3>
-            <p>{'. '.join(result.get('summary', [])).replace('- ', '')}</p>
-            
-            <h3 style="color: #2980B9;">Main Health Concerns</h3>
-            <p>{'. '.join(result.get('concerns', [])).replace('- ', '')}</p>
-            
-            <h3 style="color: #2980B9;">Additional Tests or Follow-Ups</h3>
-            <p>{'. '.join(result.get('follow_ups', [])).replace('- ', '')}</p>
+    output = f"""
+    **Comprehensive Health Recommendations**
 
-            <h3 style="color: #2980B9;">Actionable Lifestyle Advice</h3>
-            <p>{'. '.join(result.get('lifestyle', [])).replace('- ', '')}</p>
+    **Summary of Findings:**
 
-            <h3 style="color: #2980B9;">References</h3>
-            <p>{' '.join([f'<a href="{ref}" target="_blank">{ref}</a>' for ref in result.get('references', [])])}</p>
-        </div>
-        """
-        return output
-    else:
-        return "<p>An unexpected result format was returned. Please check the analysis.</p>"
+    * {' '.join(result.get('summary', []))}
 
+    **Main Health Concerns:**
+
+    * {' '.join(result.get('concerns', []))}
+
+    **Additional Tests or Follow-Ups:**
+
+    * {' '.join(result.get('follow_ups', []))}
+
+    **Actionable Lifestyle Advice:**
+
+    {format_lifestyle_advice(result.get('lifestyle', []))}
+
+    **References:**
+
+    {format_references(result.get('references', []))}
+    """
+    return output
+
+def format_lifestyle_advice(advice_list):
+    formatted_advice = ""
+    for advice in advice_list:
+        formatted_advice += f"* {advice}\n"
+    return formatted_advice
+
+def format_references(ref_list):
+    formatted_references = ""
+    for ref in ref_list:
+        formatted_references += f"* [{ref}]({ref})\n"
+    return formatted_references
 
 if __name__ == "__main__":
     main()
