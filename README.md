@@ -72,13 +72,13 @@ Ensure that you have Python 3.8 or above installed on your machine.
 
 medical-report-analysis/
 │
-├── app.py # Main application script
-├── agents.py # Definitions of CrewAI agents
-├── tasks.py # Task definitions for CrewAI
-├── requirements.txt # List of Python dependencies
-├── .env # Environment variables
-├── README.md # Project documentation
-└── LICENSE # License for the project
+├── app.py 
+├── agents.py
+├── tasks.py 
+├── requirements.txt
+├── .env 
+├── README.md 
+└── LICENSE 
 
 ## Contributing
 
