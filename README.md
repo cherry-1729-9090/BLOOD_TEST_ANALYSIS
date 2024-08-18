@@ -1,4 +1,4 @@
-# 🩺Medical Report Analysis
+# 🩺 Blood Report Analysis
 
 ## Overview
 
@@ -14,7 +14,7 @@ The Medical Report Analysis app is a comprehensive tool designed to analyze bloo
 ## Application Workflow
 
 1. **Data Extraction:** The app uses PyPDF2 to extract text data from the uploaded PDF files.
-2. **Analysis:** Leveraging CrewAI, the app processes the data through various agents, each responsible for specific tasks such as summarizing key findings, identifying health         concerns, and providing recommendations.
+2. **Analysis:** Leveraging CrewAI, the app processes the data through various agents, each responsible for specific tasks such as summarizing key findings, identifying health concerns, and providing recommendations.
 3. **Output:** The processed data is then displayed on the Streamlit interface, categorized into key findings, main health concerns, additional tests or follow-ups, lifestyle advice, and trusted medical resources.
 
 ## Installation
@@ -70,15 +70,17 @@ Ensure that you have Python 3.8 or above installed on your machine.
 
 ## Project Structure
 
+```plaintext
 medical-report-analysis/
 │
-├── app.py 
-├── agents.py
-├── tasks.py 
-├── requirements.txt
-├── .env 
-├── README.md 
-└── LICENSE 
+├── app.py               # Main application script
+├── agents.py            # Definitions of CrewAI agents
+├── tasks.py             # Task definitions for CrewAI
+├── requirements.txt     # List of Python dependencies
+├── .env                 # Environment variables
+├── README.md            # Project documentation
+└── LICENSE              # License for the project
+```
 
 ## Contributing
 
