@@ -28,7 +28,7 @@ Ensure that you have Python 3.8 or above installed on your machine.
 1. **Clone the Repository:**
    ```bash
    git clone https://github.com/your-username/medical-report-analysis.git
-   cd medical-report-analysis
+   cd WINGIFY
    ```
 
 2. **Install Dependencies:**
@@ -70,7 +70,7 @@ Ensure that you have Python 3.8 or above installed on your machine.
 
 ## Project Structure
 
-```plaintext
+```
 medical-report-analysis/
 │
 ├── app.py               # Main application script
@@ -82,6 +82,12 @@ medical-report-analysis/
 └── LICENSE              # License for the project
 ```
 
+# Video
+   Here is the video of the screen recording of how the project works.
+   [Video Link](https://www.loom.com/share/50a8c8a00be848dfb95242c360c8c5ab?sid=671c76f9-6f62-4263-ba2e-a3556531985c)
+
+   Here is the ScreenShot of the project
+   ![Image](/assets/image.png)
 ## Contributing
 
 Contributions to the project are welcome! If you have ideas for improvement or new features, please feel free to submit a Pull Request. Before contributing, please ensure that your code adheres to the existing code style and passes all tests.
