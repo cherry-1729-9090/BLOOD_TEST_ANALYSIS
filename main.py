@@ -100,16 +100,16 @@ def format_analysis(result):
             <h2 style="color: #2E86C1;">Analysis Results</h2>
             
             <h3 style="color: #2980B9;">Summary of Key Findings</h3>
-            <p>{result.get('summary', 'No summary available')}</p>
+            <p>{'. '.join(result.get('summary', [])).replace('- ', '')}</p>
             
             <h3 style="color: #2980B9;">Main Health Concerns</h3>
-            <p>{', '.join(result.get('concerns', []))}</p>
+            <p>{'. '.join(result.get('concerns', [])).replace('- ', '')}</p>
             
             <h3 style="color: #2980B9;">Additional Tests or Follow-Ups</h3>
-            <p>{', '.join(result.get('follow_ups', []))}</p>
+            <p>{'. '.join(result.get('follow_ups', [])).replace('- ', '')}</p>
 
             <h3 style="color: #2980B9;">Actionable Lifestyle Advice</h3>
-            <p>{', '.join(result.get('lifestyle', []))}</p>
+            <p>{'. '.join(result.get('lifestyle', [])).replace('- ', '')}</p>
 
             <h3 style="color: #2980B9;">References</h3>
             <p>{' '.join([f'<a href="{ref}" target="_blank">{ref}</a>' for ref in result.get('references', [])])}</p>
@@ -118,6 +118,7 @@ def format_analysis(result):
         return output
     else:
         return "<p>An unexpected result format was returned. Please check the analysis.</p>"
+
 
 if __name__ == "__main__":
     main()
